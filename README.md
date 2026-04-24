@@ -9,21 +9,18 @@ Only 4 wires + minimal code.
 - SCL → GPIO 22
 - SDA → GPIO 21
 
-![Wiring](images/wiring.png)
 
 ## ⚡ Code
-Upload the file inside `/code/esp32_oled_demo.ino`
+Upload the file inside `/demo.ino`
 
 ## 📦 Parts used (same as video)
 - ESP32 Dev Board  
 - OLED 0.96" SSD1306  
 - Jumper wires  
 
-👉 Get exact parts here:  
-[Your Beacons link]
+⚡⚡⚡👉 Get exact parts here:  
+https://beacons.ai/ztronics
 
-## 🎬 Demo
-![Demo](images/demo.gif)
 
 ## 📌 Notes
 - I2C address: usually `0x3C` (sometimes `0x3D`)
