@@ -1,2 +1,33 @@
-# esp32-oled-ssd1306
- ESP32 OLED 0.96" (SSD1306) – Quick Setup  Simple ESP32 + OLED (0.96") I2C project.   Only 4 wires + minimal code
+# ESP32 OLED 0.96" (SSD1306) – Quick Setup
+
+Simple ESP32 + OLED (0.96") I2C project.  
+Only 4 wires + minimal code.
+
+## 🔧 Wiring
+- VCC → 3.3V
+- GND → GND
+- SCL → GPIO 22
+- SDA → GPIO 21
+
+![Wiring](images/wiring.png)
+
+## ⚡ Code
+Upload the file inside `/code/esp32_oled_demo.ino`
+
+## 📦 Parts used (same as video)
+- ESP32 Dev Board  
+- OLED 0.96" SSD1306  
+- Jumper wires  
+
+👉 Get exact parts here:  
+[Your Beacons link]
+
+## 🎬 Demo
+![Demo](images/demo.gif)
+
+## 📌 Notes
+- I2C address: usually `0x3C` (sometimes `0x3D`)
+- Works with Adafruit SSD1306 + GFX libraries
+
+## 🔥 More projects
+Follow for more ESP32 / Arduino builds.
