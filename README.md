@@ -1,5 +1,7 @@
 # ESP32 OLED 0.96" (SSD1306) – Quick Setup
 
+Used in my ESP32 OLED  video (15K+ views)
+
 Simple ESP32 + OLED (0.96") I2C project.  
 Only 4 wires + minimal code.
 
