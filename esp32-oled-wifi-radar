@@ -1,0 +1,252 @@
+#include <WiFi.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <math.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+#define MAX_NET 20
+#define MAX_CHANNELS 14
+
+struct Network {
+  int angle;
+  int radius;
+  int rssi;
+  int channel;
+};
+
+Network nets[MAX_NET];
+int netCount = 0;
+
+int sweepAngle = 0;
+unsigned long lastScan = 0;
+
+// HUD
+String systemState = "SCANNING";
+unsigned long animTimer = 0;
+int dots = 0;
+
+// ================= SETUP =================
+void setup() {
+  Serial.begin(115200);
+
+  Wire.begin(21, 22);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("OLED FAIL");
+    while (true);
+  }
+
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  display.ssd1306_command(0x10);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(10, 25);
+  display.println("RADAR INIT...");
+  display.display();
+  delay(1500);
+}
+
+// ================= SCAN =================
+void scanWiFi() {
+
+  netCount = 0;
+
+  int n = WiFi.scanNetworks();
+
+  Serial.print("Networks: ");
+  Serial.println(n);
+
+  for (int i = 0; i < n && netCount < MAX_NET; i++) {
+
+    int rssi = WiFi.RSSI(i);
+    int ch = WiFi.channel(i);
+
+    if (rssi < -95) continue; // menos agressivo
+
+    nets[netCount].angle = random(0, 360);
+    nets[netCount].radius = map(rssi, -90, -30, 10, 30);
+    nets[netCount].rssi = rssi;
+    nets[netCount].channel = ch;
+
+    netCount++;
+  }
+}
+
+// ================= BEST CHANNEL =================
+int getBestChannel() {
+
+  float score[MAX_CHANNELS] = {0};
+
+  for (int i = 0; i < netCount; i++) {
+
+    int ch = nets[i].channel;
+    int rssi = nets[i].rssi;
+
+    float w = pow(10, rssi / 10.0);
+
+    for (int o = -2; o <= 2; o++) {
+      int c = ch + o;
+      if (c > 0 && c <= 11) {
+        score[c] += w / (abs(o) + 1);
+      }
+    }
+  }
+
+  int best = 1;
+  float minS = 999999;
+
+  for (int i = 1; i <= 11; i++) {
+    if (score[i] > 0 && score[i] < minS) {
+      minS = score[i];
+      best = i;
+    }
+  }
+
+  return best;
+}
+
+// ================= DRAW =================
+
+void drawRadarBase() {
+  display.drawCircle(32, 32, 30, WHITE);
+  display.drawCircle(32, 32, 20, WHITE);
+  display.drawCircle(32, 32, 10, WHITE);
+}
+
+void drawSweep() {
+  float rad = sweepAngle * PI / 180.0;
+
+  int x = 32 + cos(rad) * 30;
+  int y = 32 + sin(rad) * 30;
+
+  display.drawLine(32, 32, x, y, WHITE);
+
+  sweepAngle += 4;
+  if (sweepAngle >= 360) sweepAngle = 0;
+}
+
+// ================= HUD =================
+
+void drawHUD(int bestIndex) {
+
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+
+  // topo
+  display.setCursor(64, 0);
+  display.print("NET:");
+  display.print(netCount);
+
+  display.setCursor(100, 0);
+  display.print("CH:");
+  display.print(getBestChannel());
+
+  // estado
+  if (netCount == 0) {
+    systemState = "NO SIGNAL";
+  } else if (bestIndex != -1) {
+    systemState = "TRACKING";
+  } else {
+    systemState = "SCANNING";
+  }
+
+  display.setCursor(64, 12);
+  display.print(systemState);
+
+  // animação ...
+  if (millis() - animTimer > 300) {
+    dots++;
+    if (dots > 3) dots = 0;
+    animTimer = millis();
+  }
+
+  display.setCursor(120, 12);
+  for (int i = 0; i < dots; i++) display.print(".");
+
+  // info alvo
+  if (bestIndex != -1) {
+
+    display.setCursor(64, 28);
+
+    // efeito blink LOCK
+    if (millis() % 500 < 250) {
+      display.print("LOCKED");
+    }
+
+    display.setCursor(64, 40);
+    display.print("RSSI:");
+    display.print(nets[bestIndex].rssi);
+
+    display.setCursor(64, 52);
+    display.print("CH:");
+    display.print(nets[bestIndex].channel);
+
+  } else {
+
+    display.setCursor(64, 32);
+    display.print("SEARCHING");
+
+    display.setCursor(64, 44);
+    display.print("SIGNAL...");
+  }
+
+  // linha HUD lateral
+  display.drawLine(60, 0, 60, 64, WHITE);
+}
+
+// ================= TARGETS =================
+
+void drawTargets() {
+
+  int strongest = -100;
+  int bestIndex = -1;
+
+  for (int i = 0; i < netCount; i++) {
+    if (nets[i].rssi > strongest) {
+      strongest = nets[i].rssi;
+      bestIndex = i;
+    }
+  }
+
+  for (int i = 0; i < netCount; i++) {
+
+    float rad = nets[i].angle * PI / 180.0;
+
+    int x = 32 + cos(rad) * nets[i].radius;
+    int y = 32 + sin(rad) * nets[i].radius;
+
+    display.fillCircle(x, y, 2, WHITE);
+
+    if (i == bestIndex) {
+      display.drawCircle(x, y, 4, WHITE);
+    }
+  }
+
+  drawHUD(bestIndex);
+}
+
+// ================= LOOP =================
+
+void loop() {
+
+  if (millis() - lastScan > 4000) {
+    scanWiFi();
+    lastScan = millis();
+  }
+
+  display.clearDisplay();
+
+  drawRadarBase();
+  drawSweep();
+  drawTargets();
+
+  display.display();
+
+  delay(40);
+}
