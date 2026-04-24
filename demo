@@ -1,0 +1,42 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+int x = 0;
+
+void setup() {
+  Wire.begin(21, 22);
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    while(true);
+  }
+
+  display.clearDisplay();
+}
+
+void loop() {
+  display.clearDisplay();
+
+  display.setTextSize(2);
+  display.setCursor(0, 0);
+  display.setTextColor(SSD1306_WHITE);
+  display.println("ESP32");
+
+  display.setTextSize(1);
+  display.setCursor(0, 20);
+  display.println("ZTRONICS");
+
+  display.fillRect(0, 40, x, 10, SSD1306_WHITE);
+  display.fillCircle(x, 45, 2, SSD1306_WHITE);
+
+  x++;
+  if (x > 127) x = 0;
+
+  display.display();
+  delay(20);
+}
