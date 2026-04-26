@@ -29,4 +29,8 @@ https://beacons.ai/ztronics
 - Works with Adafruit SSD1306 + GFX libraries
 
 ## 🔥 More projects
+
+https://youtube.com/playlist?list=PLfS15bZB9GyGUaoWqW_L5w8ZRv8BZgcgc&si=VD2_vYHylczvFb1s
+
 Follow for more ESP32 / Arduino builds.
+
