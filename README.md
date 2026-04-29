@@ -30,6 +30,8 @@ https://beacons.ai/ztronics
 
 ## 🔥 More projects
 
+https://www.instructables.com/member/ztr0nics/
+
 https://youtube.com/playlist?list=PLfS15bZB9GyGUaoWqW_L5w8ZRv8BZgcgc&si=VD2_vYHylczvFb1s
 
 Follow for more ESP32 / Arduino builds.
