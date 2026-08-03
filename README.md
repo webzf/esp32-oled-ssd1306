@@ -17,7 +17,7 @@ Upload the file inside `/demo.ino`
 
 ## 📦 Parts used (same as video)
 - ESP32 Dev Board  
-- OLED 0.96" SSD1306  
+- [OLED 0.96" SSD1306](https://embeddednerd.com/ESP32-OLED-Tutorial-Wiring-Code-&-Display-Guide/)  
 - Jumper wires  
 
 ⚡⚡⚡👉 Get exact parts here:  
